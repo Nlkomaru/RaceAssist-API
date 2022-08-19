@@ -16,6 +16,7 @@ jobs:
         with:
           node-version: 14
           cache: npm
+          cache-dependency-path: package-lock.json
       - run: npm install
       - name: Publish Worker
         uses: cloudflare/wrangler-action@2.0.0
