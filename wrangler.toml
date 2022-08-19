@@ -1,0 +1,11 @@
+name = "raceassist-router" 
+main ="src/index.ts"
+compatibility_date = "2022-05-03"
+
+[[r2_buckets]]
+binding = 'BUCKET_BET'
+bucket_name = 'raceassist-bet'
+
+[[r2_buckets]]
+binding = 'BUCKET_RESULT' # <~ valid JavaScript variable name
+bucket_name = 'raceassist-result'
