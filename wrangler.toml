@@ -7,5 +7,9 @@ binding = 'BUCKET_BET'
 bucket_name = 'raceassist-bet'
 
 [[r2_buckets]]
-binding = 'BUCKET_RESULT' # <~ valid JavaScript variable name
+binding = 'BUCKET_RESULT'
 bucket_name = 'raceassist-result'
+
+[[r2_buckets]]
+binding = 'BUCKET_HORSE'
+bucket_name = 'raceassist-horse'

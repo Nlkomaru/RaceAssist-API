@@ -4,6 +4,7 @@ import { basicAuth } from "hono/basic-auth";
 interface Env {
   BUCKET_BET: R2Bucket;
   BUCKET_RESULT: R2Bucket;
+  BUCKET_HORSE : R2Bucket;
   USERNAME: string;
   PASSWORD: string;
 }
@@ -12,6 +13,8 @@ const router = new Hono<Env>({ strict: false });
 const v1 = new Hono<Env>({ strict: false });
 const resultRouter = new Hono<Env>({ strict: false });
 const betRouter = new Hono<Env>({ strict: false });
+const horseRouter = new Hono<Env>({ strict: false });
+
 
 
 const jsonHeader = {
@@ -32,7 +35,7 @@ resultRouter.post("*", async (context, next) => {
   await auth(context, next);
 });
 
-resultRouter.get("/record/:key", async (context) => {
+resultRouter.get("/:key", async (context) => {
   let key = context.req.param("key");
 
   const r2 = context.env.BUCKET_RESULT;
@@ -62,7 +65,7 @@ resultRouter.get("/list", async (context) => {
 });
 
 //JSONの追加
-resultRouter.post("/push/:key", async (context) => {
+resultRouter.post("/:key", async (context) => {
   if (
     context.req.headers.get("Content-Type")?.toLowerCase() !==
     "application/json; charset=utf-8"
@@ -93,7 +96,7 @@ betRouter.all("*", async (context, next) => {
    await auth(context, next);
 });
 
-betRouter.get("/record/:key", async (context) => {
+betRouter.get("/:key", async (context) => {
   let key = context.req.param("key");
 
   const r2 = context.env.BUCKET_BET;
@@ -123,7 +126,7 @@ betRouter.get("/list", async (context) => {
 });
 
 //JSONの追加
-betRouter.post("/push/:key", async (context) => {
+betRouter.post("/:key", async (context) => {
   if (
     context.req.headers.get("Content-Type")?.toLowerCase() !==
     "application/json; charset=utf-8"
@@ -144,8 +147,68 @@ betRouter.post("/push/:key", async (context) => {
   });
 });
 
+horseRouter.all("*", async (context, next) => {
+  const auth =  basicAuth({
+    username: context.env.USERNAME,
+    password: context.env.PASSWORD,
+  });
+  await auth(context, next);
+});
+
+horseRouter.get("/:key", async (context) => {
+  let key = context.req.param("key");
+
+  const r2 = context.env.BUCKET_HORSE;
+
+  let object = await r2.get(key);
+
+  if (!object) {
+    return new Response("Object Not Found", { status: 404 });
+  } else {
+    return new Response(object.body, {
+      headers: jsonHeader,
+    });
+  }
+});
+
+horseRouter.get("/list", async (context) => {
+  const r2 = context.env.BUCKET_HORSE;
+  const list = await r2.list();
+  const nameList = Array<String>();
+  list.objects.forEach((object) => {
+    nameList.push(object.key);
+  });
+
+  return new Response(JSON.stringify(nameList), {
+    headers: jsonHeader,
+  });
+});
+
+//JSONの追加
+horseRouter.post("/:key", async (context) => {
+  if (
+      context.req.headers.get("Content-Type")?.toLowerCase() !==
+      "application/json; charset=utf-8"
+  ) {
+    return;
+  }
+
+  const key = context.req.param("key");
+  let name = key + ".json";
+
+  const r2 = context.env.BUCKET_HORSE;
+
+  await r2.put(name, JSON.stringify(await context.req.json()), {
+    httpMetadata: { contentType: "application/json" },
+  });
+  return new Response("POST completed", {
+    status: 400,
+  });
+});
+
 v1.route("/result", resultRouter);
 v1.route("/bet", betRouter);
+v1.route("/horse", horseRouter);
 router.route("/v1", v1);
 
 export default router;
