@@ -35,7 +35,7 @@ resultRouter.post("*", async (context, next) => {
   await auth(context, next);
 });
 
-resultRouter.get("/:key", async (context) => {
+resultRouter.get("/result/:key", async (context) => {
   let key = context.req.param("key");
 
   const r2 = context.env.BUCKET_RESULT;
@@ -65,7 +65,7 @@ resultRouter.get("/list", async (context) => {
 });
 
 //JSONの追加
-resultRouter.post("/:key", async (context) => {
+resultRouter.post("/push/:key", async (context) => {
   if (
     context.req.headers.get("Content-Type")?.toLowerCase() !==
     "application/json; charset=utf-8"
@@ -84,7 +84,7 @@ resultRouter.post("/:key", async (context) => {
     httpMetadata: { contentType: "application/json" },
   });
   return new Response("POST completed", {
-    status: 400,
+    status: 200,
   });
 });
 
@@ -96,7 +96,7 @@ betRouter.all("*", async (context, next) => {
    await auth(context, next);
 });
 
-betRouter.get("/:key", async (context) => {
+betRouter.get("/result/:key", async (context) => {
   let key = context.req.param("key");
 
   const r2 = context.env.BUCKET_BET;
@@ -126,7 +126,7 @@ betRouter.get("/list", async (context) => {
 });
 
 //JSONの追加
-betRouter.post("/:key", async (context) => {
+betRouter.post("/push/:key", async (context) => {
   if (
     context.req.headers.get("Content-Type")?.toLowerCase() !==
     "application/json; charset=utf-8"
@@ -143,7 +143,7 @@ betRouter.post("/:key", async (context) => {
     httpMetadata: { contentType: "application/json" },
   });
   return new Response("POST completed", {
-    status: 400,
+    status: 200,
   });
 });
 
@@ -155,7 +155,7 @@ horseRouter.all("*", async (context, next) => {
   await auth(context, next);
 });
 
-horseRouter.get("/:key", async (context) => {
+horseRouter.get("/record/:key", async (context) => {
   let key = context.req.param("key");
 
   const r2 = context.env.BUCKET_HORSE;
@@ -185,7 +185,7 @@ horseRouter.get("/list", async (context) => {
 });
 
 //JSONの追加
-horseRouter.post("/:key", async (context) => {
+horseRouter.post("/push/:key", async (context) => {
   if (
       context.req.headers.get("Content-Type")?.toLowerCase() !==
       "application/json; charset=utf-8"
@@ -202,7 +202,7 @@ horseRouter.post("/:key", async (context) => {
     httpMetadata: { contentType: "application/json" },
   });
   return new Response("POST completed", {
-    status: 400,
+    status: 200,
   });
 });
 
