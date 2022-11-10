@@ -15,8 +15,6 @@ const resultRouter = new Hono<Env>({ strict: false });
 const betRouter = new Hono<Env>({ strict: false });
 const horseRouter = new Hono<Env>({ strict: false });
 
-
-
 const jsonHeader = {
   "Content-Type": "Application/Json",
 };
@@ -147,7 +145,7 @@ betRouter.post("/push/:key", async (context) => {
   });
 });
 
-horseRouter.all("*", async (context, next) => {
+horseRouter.post("*", async (context, next) => {
   const auth =  basicAuth({
     username: context.env.USERNAME,
     password: context.env.PASSWORD,
@@ -204,6 +202,25 @@ horseRouter.post("/push/:key", async (context) => {
   return new Response("POST completed", {
     status: 200,
   });
+});
+
+horseRouter.post("/remove/:key", async (context) => {
+    if (
+        context.req.headers.get("Content-Type")?.toLowerCase() !==
+        "application/json; charset=utf-8"
+    ) {
+        return;
+    }
+
+    const key = context.req.param("key");
+    let name = key + ".json";
+
+    const r2 = context.env.BUCKET_HORSE;
+
+    await r2.delete(name)
+    return new Response("POST completed", {
+        status: 200,
+    });
 });
 
 v1.route("/result", resultRouter);
