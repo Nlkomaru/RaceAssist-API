@@ -49,15 +49,6 @@ horseRouter.get("/list", async (context) => {
 
 //JSONの追加
 horseRouter.post("/push/:key", async (context) => {
-    if (
-        context.req.headers.get("Content-Type")?.toLowerCase() !==
-        "application/json"
-    ) {
-        return new Response("Content-Type is different", {
-        status: 400,
-    });
-    }
-
     const key = context.req.param("key");
     let name = key + ".json";
 
