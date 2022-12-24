@@ -51,7 +51,7 @@ horseRouter.get("/list", async (context) => {
 horseRouter.post("/push/:key", async (context) => {
     if (
         context.req.headers.get("Content-Type")?.toLowerCase() !==
-        "application/json; charset=utf-8"
+        "application/json"
     ) {
         return;
     }
