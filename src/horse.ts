@@ -8,7 +8,7 @@ const jsonHeader = {
     "Content-Type": "Application/Json",
 };
 
-horseRouter.get('*', cache({ cacheName: 'my-app', cacheControl: 'max-age=1800' }))
+horseRouter.get('*', cache({ cacheName: 'my-app', cacheControl: 'max-age=120' }))
 
 horseRouter.post("*", async (context, next) => {
     const auth = basicAuth({
