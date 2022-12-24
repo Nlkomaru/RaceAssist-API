@@ -53,7 +53,9 @@ horseRouter.post("/push/:key", async (context) => {
         context.req.headers.get("Content-Type")?.toLowerCase() !==
         "application/json"
     ) {
-        return;
+        return new Response("Content-Type is different", {
+        status: 400,
+    });
     }
 
     const key = context.req.param("key");
