@@ -71,13 +71,6 @@ horseRouter.get("/listAll", async (context) => {
         headers: jsonHeader,
     });
 });
-horseRouter.get("/rewrite", async (context, next) => {
-    const auth = basicAuth({
-        username: context.env.USERNAME,
-        password: context.env.PASSWORD,
-    });
-    await auth(context, next);
-});
 
 horseRouter.get("/rewrite", async (context) => {
     await rewrite(context)
