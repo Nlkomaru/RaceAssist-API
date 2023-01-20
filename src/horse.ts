@@ -109,6 +109,7 @@ async function rewrite(context: Context<string, { Bindings: Env }>) {
 
     const kv = context.env.RACE_ASSIST;
     await kv.put("horse-list", JSON.stringify(dataList))
+    console.log("rewrite complete")
 }
 
 

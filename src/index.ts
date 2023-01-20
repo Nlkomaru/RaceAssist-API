@@ -6,11 +6,7 @@ import horseRouter from "./horse";
 const router = new Hono<{ Bindings: Env }>({strict: false});
 const v1 = new Hono<{ Bindings: Env }>({strict: false});
 
-v1.get("/", () => {
-    return new Response(
-        "Hello, world! This is the root page of your Worker template."
-    );
-});
+v1.get("/", (c) => c.text("Hello, world! This is the root page of your Worker template."));
 
 v1.route("/result", resultRouter);
 v1.route("/bet", betRouter);
