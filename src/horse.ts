@@ -71,16 +71,15 @@ horseRouter.get("/listAll", async (context) => {
         headers: jsonHeader,
     });
 });
-
-
-horseRouter.get("/rewrite", async (context , next) => {
+horseRouter.get("/rewrite", async (context, next) => {
     const auth = basicAuth({
         username: context.env.USERNAME,
         password: context.env.PASSWORD,
     });
     await auth(context, next);
+});
 
-
+horseRouter.get("/rewrite", async (context) => {
     await rewrite(context)
     context.text("rewrite complete")
 });
@@ -106,10 +105,12 @@ async function rewrite(context: Context<string, { Bindings: Env }>) {
             dataList.push(horseData);
         }
     }
+    console.log("data put complete")
 
     const kv = context.env.RACE_ASSIST;
+    console.log("kv access complete")
     await kv.put("horse-list", JSON.stringify(dataList))
-    console.log("rewrite complete")
+    console.log("put complete")
 }
 
 
