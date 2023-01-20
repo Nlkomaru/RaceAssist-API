@@ -26,6 +26,7 @@ betRouter.get("/result/:key", async (context) => {
     } else {
         return new Response(object.body, {
             headers: jsonHeader,
+            status : 200
         });
     }
 });

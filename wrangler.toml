@@ -13,3 +13,7 @@ bucket_name = 'raceassist-result'
 [[r2_buckets]]
 binding = 'BUCKET_HORSE'
 bucket_name = 'raceassist-horse'
+
+kv_namespaces = [
+    { binding = "RACE_ASSIST", id = "5154786ca7ad4d699d046ce708de825e", preview_id = "5154786ca7ad4d699d046ce708de825e" }
+]

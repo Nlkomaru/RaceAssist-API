@@ -1,5 +1,5 @@
 import {basicAuth} from "hono/basic-auth";
-import {Hono} from "hono";
+import {Context, Hono} from "hono";
 import {cache} from "hono/cache"
 
 const horseRouter = new Hono<{ Bindings: Env }>({strict: false});
@@ -7,6 +7,7 @@ const horseRouter = new Hono<{ Bindings: Env }>({strict: false});
 const jsonHeader = {
     "Content-Type": "Application/Json",
 };
+const notFoundResponse = new Response("Object Not Found", {status: 404})
 
 horseRouter.get('*', cache({ cacheName: 'my-app', cacheControl: 'max-age=120' }))
 
@@ -26,7 +27,7 @@ horseRouter.get("/record/:key", async (context) => {
     let object = await r2.get(key);
 
     if (!object) {
-        return new Response("Object Not Found", {status: 404});
+        return notFoundResponse;
     } else {
         return new Response(object.body, {
             headers: jsonHeader,
@@ -48,34 +49,67 @@ horseRouter.get("/list", async (context) => {
 });
 
 //JSONの追加
-horseRouter.post("/push/:key", async (context) => {
+horseRouter.post("/push/:key", async (context: Context<string, {Bindings: Env}>) => {
     const key = context.req.param("key");
     let name = key + ".json";
-
     const r2 = context.env.BUCKET_HORSE;
-
     await r2.put(name, JSON.stringify(await context.req.json()), {
         httpMetadata: {contentType: "application/json"},
     });
-    return new Response("POST completed", {
-        status: 200,
-    });
+
+    context.text("POST completed")
+    await onChange(context)
 });
 
 horseRouter.get("/listAll", async (context) => {
+    const kv = context.env.RACE_ASSIST;
+    const json = await kv.get("horse-list")
+    if (!json) {
+        return notFoundResponse
+    }
+    return new Response(JSON.parse(json), {
+        headers: jsonHeader,
+    });
+});
+
+
+horseRouter.get("/rewrite", async (context , next) => {
+    const auth = basicAuth({
+        username: context.env.USERNAME,
+        password: context.env.PASSWORD,
+    });
+    await auth(context, next);
+
+
+    await rewrite(context)
+    context.text("rewrite complete")
+});
+
+
+async function onChange(context: Context<string, { Bindings: Env }>) {
+    await rewrite(context)
+
+}
+
+async function reRender(){
+    //TODO
+}
+
+async function rewrite(context: Context<string, { Bindings: Env }>) {
     const r2 = context.env.BUCKET_HORSE;
     const list = await r2.list();
-    const nameList = Array<HorseData>();
+    const dataList = Array<HorseData>();
     for (const object of list.objects) {
         const data = await r2.get(object.key);
         if (data) {
             const horseData: HorseData = await data.json();
-            nameList.push(horseData);
+            dataList.push(horseData);
         }
     }
-    return new Response(JSON.stringify(nameList), {
-        headers: jsonHeader,
-    });
-});
+
+    const kv = context.env.RACE_ASSIST;
+    await kv.put("horse-list", JSON.stringify(dataList))
+}
+
 
 export default horseRouter;
