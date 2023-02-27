@@ -67,7 +67,7 @@ horseRouter.get("/listAll", async (context) => {
     if (!json) {
         return notFoundResponse()
     }
-    return new Response(JSON.parse(json), {
+    return new Response(json, {
         headers: jsonHeader,
     });
 });
@@ -101,8 +101,8 @@ async function rewrite(context: Context<string, { Bindings: Env }>) {
 
     const kv = context.env.RACE_ASSIST;
     const json = JSON.stringify(dataList)
-    console.log(json)
-    await kv.put("horse-list", json )
+
+    await kv.put("horse-list", json)
 }
 
 
