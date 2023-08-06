@@ -58,7 +58,6 @@ horseRouter.post("/push/:key", async (context: Context<string, {Bindings: Env}>)
     });
 
     context.text("POST completed")
-    await onChange(context)
 });
 
 horseRouter.get("/listAll", async (context) => {
@@ -76,16 +75,6 @@ horseRouter.get("/rewrite", async (context) => {
     await rewrite(context)
     context.text("rewrite complete")
 });
-
-
-async function onChange(context: Context<string, { Bindings: Env }>) {
-    await rewrite(context)
-
-}
-
-async function reRender(){
-    //TODO
-}
 
 async function rewrite(context: Context<string, { Bindings: Env }>) {
     const r2 = context.env.BUCKET_HORSE;
