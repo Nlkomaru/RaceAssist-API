@@ -1,12 +1,3 @@
-import {Context} from "hono";
-import horseRouter from "./horse";
-import {env} from "hono/dist/types/adapter";
-
-horseRouter.get("/rewrite", async (context) => {
-    await rewrite(context.env)
-    context.text("rewrite complete")
-});
-
 export async function rewrite(env: Env) {
     const r2 = env.BUCKET_HORSE;
     const list = await r2.list();
@@ -18,12 +9,12 @@ export async function rewrite(env: Env) {
             dataList.push(horseData);
         }
     }
-
+    console.log("cron start. Current time is" + new Date().toString());
     const kv = env.RACE_ASSIST;
     const json = JSON.stringify(dataList)
     console.log("rewrite data count is " + dataList.length)
     await kv.put("horse-list", json)
-
+    console.log("cron processed. Current time is" + new Date().toString());
 }
 
 const handler= {
@@ -32,7 +23,6 @@ const handler= {
                     ctx: ExecutionContext
     ): Promise<void> {
         ctx.waitUntil(rewrite(environment))
-        console.log("cron processed. Current time is" + new Date().toString());
     },
 };
 

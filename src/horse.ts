@@ -1,6 +1,7 @@
 import {basicAuth} from "hono/basic-auth";
 import {Context, Hono} from "hono";
 import {cache} from "hono/cache"
+import {rewrite} from "./cron";
 
 const horseRouter = new Hono<{ Bindings: Env }>({strict: false});
 
@@ -75,5 +76,9 @@ horseRouter.get("/listAll", async (context) => {
     });
 });
 
+horseRouter.get("/rewrite", async (context) => {
+    await rewrite(context.env)
+    context.text("rewrite complete")
+});
 
 export default horseRouter;
