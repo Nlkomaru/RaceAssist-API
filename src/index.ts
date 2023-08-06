@@ -2,6 +2,7 @@ import {Hono} from "hono";
 import resultRouter from "./result";
 import betRouter from "./bet";
 import horseRouter from "./horse";
+import {rewrite} from "./cron";
 
 const router = new Hono<{ Bindings: Env }>({strict: false});
 const v1 = new Hono<{ Bindings: Env }>({strict: false});
