@@ -1,5 +1,5 @@
 
-interface Env  {
+type  Env = {
     BUCKET_BET: R2Bucket;
     BUCKET_RESULT: R2Bucket;
     BUCKET_HORSE : R2Bucket;

@@ -9,7 +9,7 @@ const jsonHeader = {
 };
 const notFoundResponse = () => new Response("Object Not Found", {status: 404})
 
-horseRouter.get('*', cache({ cacheName: 'my-app', cacheControl: 'max-age=120' }));
+horseRouter.get('*', cache({cacheName: 'my-app', cacheControl: 'max-age=120'}));
 
 horseRouter.post("*", async (context, next) => {
     const auth = basicAuth({
@@ -49,7 +49,7 @@ horseRouter.get("/list", async (context) => {
 });
 
 //JSONの追加
-horseRouter.post("/push/:key", async (context: Context<string, {Bindings: Env}>) => {
+horseRouter.post("/push/:key", async (context) => {
     const key = context.req.param("key");
     let name = key + ".json";
     const r2 = context.env.BUCKET_HORSE;
@@ -76,7 +76,7 @@ horseRouter.get("/rewrite", async (context) => {
     context.text("rewrite complete")
 });
 
-async function rewrite(context: Context<string, { Bindings: Env }>) {
+async function rewrite(context: Context<{ Bindings: Env; }, "/rewrite", {}>) {
     const r2 = context.env.BUCKET_HORSE;
     const list = await r2.list();
     const dataList = Array<HorseData>();
