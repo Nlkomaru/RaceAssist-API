@@ -13,10 +13,10 @@ v1.route("/result", resultRouter);
 v1.route("/bet", betRouter);
 v1.route("/horse", horseRouter);
 router.route("/v1", v1);
-router.fire();
 
 
 export default {
+    fetch : router.fetch,
     async scheduled(controller: ScheduledController,
                     environment: Env,
                     ctx: ExecutionContext

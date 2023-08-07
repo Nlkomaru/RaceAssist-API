@@ -14,8 +14,6 @@ bucket_name = 'raceassist-result'
 binding = 'BUCKET_HORSE'
 bucket_name = 'raceassist-horse'
 
-
-[env.production]
 kv_namespaces = [
     { binding = "RACE_ASSIST", id = "5154786ca7ad4d699d046ce708de825e" }
 ]
