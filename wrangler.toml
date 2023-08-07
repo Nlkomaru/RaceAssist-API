@@ -1,6 +1,6 @@
 name = "raceassist-router" 
 main ="src/index.ts"
-compatibility_date = "2023-08-15"
+compatibility_date = "2022-05-03"
 
 [[r2_buckets]]
 binding = 'BUCKET_BET'
