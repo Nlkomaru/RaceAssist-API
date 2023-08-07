@@ -14,13 +14,17 @@ v1.route("/bet", betRouter);
 v1.route("/horse", horseRouter);
 router.route("/v1", v1);
 
-
-export default {
-    fetch : router.fetch,
+const handler= {
     async scheduled(controller: ScheduledController,
                     environment: Env,
                     ctx: ExecutionContext
     ): Promise<void> {
         ctx.waitUntil(rewrite(environment))
-    }
+    },
+};
+
+
+export default {
+    fetch : router.fetch,
+    scheduled : handler.scheduled
 };
