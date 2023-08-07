@@ -2,7 +2,7 @@ import {Hono} from "hono";
 import resultRouter from "./result";
 import betRouter from "./bet";
 import horseRouter from "./horse";
-import handler from "./cron";
+import {rewrite} from "./cron";
 
 const router = new Hono<{ Bindings: Env }>({strict: false});
 const v1 = new Hono<{ Bindings: Env }>({strict: false});
@@ -17,5 +17,10 @@ router.route("/v1", v1);
 
 export default {
     router,
-    handler
+    async scheduled(controller: ScheduledController,
+                    environment: Env,
+                    ctx: ExecutionContext
+    ): Promise<void> {
+        ctx.waitUntil(rewrite(environment))
+    }
 };

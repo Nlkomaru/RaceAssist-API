@@ -17,13 +17,3 @@ export async function rewrite(env: Env) {
     console.log("cron processed. Current time is" + new Date().toString());
 }
 
-const handler= {
-    async scheduled(controller: ScheduledController,
-                    environment: Env,
-                    ctx: ExecutionContext
-    ): Promise<void> {
-        ctx.waitUntil(rewrite(environment))
-    },
-};
-
-export default handler;
