@@ -6,6 +6,7 @@ type  Env = {
     RACE_ASSIST : KVNamespace;
     USERNAME: string;
     PASSWORD: string;
+    DB: D1Database;
 }
 
 interface HorseData {

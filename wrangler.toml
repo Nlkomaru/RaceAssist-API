@@ -2,6 +2,10 @@ name = "raceassist-router"
 main ="src/index.ts"
 compatibility_date = "2022-05-03"
 
+kv_namespaces = [
+    { binding = "RACE_ASSIST", id = "5154786ca7ad4d699d046ce708de825e" }
+]
+
 [[r2_buckets]]
 binding = 'BUCKET_BET'
 bucket_name = 'raceassist-bet'
@@ -14,9 +18,10 @@ bucket_name = 'raceassist-result'
 binding = 'BUCKET_HORSE'
 bucket_name = 'raceassist-horse'
 
-kv_namespaces = [
-    { binding = "RACE_ASSIST", id = "5154786ca7ad4d699d046ce708de825e" }
-]
+[[d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "raceassist"
+database_id = "2de67efe-8c37-4e03-a7fa-be9f582b3b58"
 
 [triggers]
 crons = ["40 */1 * * *"]
