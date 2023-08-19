@@ -23,7 +23,7 @@ horseRouter.get("/record/:key", async (context) => {
     let key = context.req.param("key").replace(".json", "");
     const db = context.env.DB;
     const stmt = db.prepare(
-        "SELECT * FROM HORSE WHERE HORSE = ?1"
+        "SELECT * FROM HORSE WHERE horse = ?1"
     );
     const result = await stmt.bind(key).first();
 
@@ -83,18 +83,18 @@ horseRouter.post("/push/:key", async (context) => {
 
     let db = context.env.DB;
     let stmt = db.prepare(
-        "SELECT * FROM HORSE WHERE HORSE = ?"
+        "SELECT * FROM HORSE WHERE horse = ?"
     );
 
     let result = await stmt.bind(key).all();
     if (result.results.length > 0) {
         await context.env.DB.prepare(
-            "UPDATE HORSE SET HORSE = ?1, BREEDER = ?2, OWNER = ?3, MOTHER = ?4, FATHER = ?5, COLOR = ?6, STYLE = ?7, SPEED = ?8, JUMP = ?9, HEALTH = ?10, NAME = ?11, BIRTH_DATE = ?12, LAST_RECORD_DATE = ?13, DEATH_DATE = ?14, HISTORY = ?15 WHERE horseId = ?16"
+            "UPDATE HORSE SET horse = ?1, breeder = ?2, owner = ?3, mother = ?4, father = ?5, color = ?6, style = ?7, speed = ?8, jump = ?9, health = ?10, name = ?11, birthDate = ?12, lastRecordDate = ?13, deathDate = ?14, history = ?15 WHERE horse = ?16"
         ).bind(horseData.horse, horseData.breeder, horseData.owner, horseData.mother, horseData.father, horseData.color, horseData.style, horseData.speed, horseData.jump, horseData.health, horseData.name, birthDate, lastRecordDate, deathDate, JSON.stringify(horseData.history), key)
             .run();
     } else {
         await context.env.DB.prepare(
-            "INSERT INTO HORSE (HORSE , BREEDER , OWNER , MOTHER , FATHER , COLOR , STYLE , SPEED , JUMP , HEALTH , NAME , BIRTH_DATE , LAST_RECORD_DATE , DEATH_DATE, HISTORY) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15)"
+            "INSERT INTO HORSE (horse , breeder , owner , mother , father , color , style , speed , jump , health , name , birthDate , lastRecordDate , deathDate, history) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15)"
         ).bind(horseData.horse, horseData.breeder, horseData.owner, horseData.mother, horseData.father, horseData.color, horseData.style, horseData.speed, horseData.jump, horseData.health, horseData.name, birthDate, lastRecordDate, deathDate, JSON.stringify(horseData.history))
             .run();
     }
@@ -113,44 +113,43 @@ horseRouter.get("/listAll", async (context) => {
         headers: jsonHeader,
     });
 });
-// horseRouter.get("/migration", async (context) => {
-//     const kv = context.env.RACE_ASSIST;
-//     const json = await kv.get("horse-list")
-//     if (!json) {
-//         return notFoundResponse()
-//     }
-//
-//
-//
-//     const list: Array<HorseData> = JSON.parse(json);
-//
-//     let count = 0;
-//
-//     context.env.DB.prepare(
-//         "CREATE TABLE IF NOT EXISTS HORSE (HORSE TEXT PRIMARY KEY, BREEDER TEXT, OWNER TEXT, MOTHER TEXT, FATHER TEXT, COLOR TEXT, STYLE TEXT, SPEED REAL, JUMP REAL, HEALTH REAL, NAME TEXT, BIRTH_DATE TEXT, LAST_RECORD_DATE TEXT, DEATH_DATE TEXT, HISTORY JSON)"
-//     )
-//
-//
-//     const stmt = context.env.DB.prepare(
-//         "INSERT INTO HORSE (HORSE , BREEDER , OWNER , MOTHER , FATHER , COLOR , STYLE , SPEED , JUMP , HEALTH , NAME , BIRTH_DATE , LAST_RECORD_DATE , DEATH_DATE , HISTORY) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15)"
-//     )
-//
-//     for (const object of list) {
-//         count++;
-//         let horseData = object;
-//         let lastRecordDate = horseData.lastRecordDate.toString();
-//         let birthDate = horseData.birthDate ? horseData.birthDate.toString() : null;
-//         let deathDate = horseData.deathDate ? horseData.deathDate.toString() : null;
-//
-//         await stmt.bind(horseData.horse, horseData.breeder, horseData.owner, horseData.mother, horseData.father, horseData.color, horseData.style,
-//             horseData.speed, horseData.jump, horseData.health, horseData.name, birthDate, lastRecordDate, deathDate, JSON.stringify(horseData.history))
-//             .run();
-//     }
-//
-//     console.log("migration is called by " + context.req.headers.get("User-Agent"))
-//     console.log("migration complete " + count + " records")
-//     context.text("migration complete " + count + " records")
-// });
+horseRouter.get("/migration", async (context) => {
+    const kv = context.env.RACE_ASSIST;
+    const json = await kv.get("horse-list")
+    if (!json) {
+        return notFoundResponse()
+    }
+
+
+    const list: Array<HorseData> = JSON.parse(json);
+
+    let count = 0;
+
+    context.env.DB.prepare(
+        "CREATE TABLE IF NOT EXISTS HORSE (horse TEXT PRIMARY KEY, breeder TEXT, owner TEXT, mother TEXT, father TEXT, color TEXT, style TEXT, speed REAL, jump REAL, health REAL, name TEXT, birthDate TEXT, lastRecordDate TEXT, deathDate TEXT, history JSON)"
+    )
+
+
+    const stmt = context.env.DB.prepare(
+        "INSERT INTO HORSE (horse , breeder , owner , mother , father , color , style , speed , jump , health , name , birthDate , lastRecordDate , deathDate, history) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15)"
+    )
+
+    for (const object of list) {
+        count++;
+        let horseData = object;
+        let lastRecordDate = horseData.lastRecordDate.toString();
+        let birthDate = horseData.birthDate ? horseData.birthDate.toString() : null;
+        let deathDate = horseData.deathDate ? horseData.deathDate.toString() : null;
+
+        await stmt.bind(horseData.horse, horseData.breeder, horseData.owner, horseData.mother, horseData.father, horseData.color, horseData.style,
+            horseData.speed, horseData.jump, horseData.health, horseData.name, birthDate, lastRecordDate, deathDate, JSON.stringify(horseData.history))
+            .run();
+    }
+
+    console.log("migration is called by " + context.req.headers.get("User-Agent"))
+    console.log("migration complete " + count + " records")
+    context.text("migration complete " + count + " records")
+});
 
 
 export default horseRouter;
