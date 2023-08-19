@@ -2,7 +2,6 @@ import {Hono} from "hono";
 import resultRouter from "./result";
 import betRouter from "./bet";
 import horseRouter from "./horse";
-import {rewrite} from "./cron";
 
 const router = new Hono<{ Bindings: Env }>({strict: false});
 const v1 = new Hono<{ Bindings: Env }>({strict: false});
@@ -14,17 +13,6 @@ v1.route("/bet", betRouter);
 v1.route("/horse", horseRouter);
 router.route("/v1", v1);
 
-const handler= {
-    async scheduled(controller: ScheduledController,
-                    environment: Env,
-                    ctx: ExecutionContext
-    ): Promise<void> {
-        ctx.waitUntil(rewrite(environment))
-    },
-};
-
-
 export default {
     fetch : router.fetch,
-    scheduled : handler.scheduled
 };

@@ -1,7 +1,6 @@
 import {basicAuth} from "hono/basic-auth";
 import {Hono} from "hono";
 import {cache} from "hono/cache"
-import {rewrite} from "./cron";
 
 const horseRouter = new Hono<{ Bindings: Env }>({strict: false});
 
@@ -24,10 +23,9 @@ horseRouter.get("/record/:key", async (context) => {
     let key = context.req.param("key").replace(".json", "");
     const db = context.env.DB;
     const stmt = db.prepare(
-        "SELECT * FROM HORSE WHERE horseId = ?"
-    ).bind(key);
-
-    const result = await stmt.first() as HorseData;
+        "SELECT * FROM HORSE WHERE HORSE = ?1"
+    );
+    const result = await stmt.bind(key).first();
 
     console.log("record is called. key is " + key + " by " + context.req.headers.get("User-Agent"))
     if (!result) {
@@ -63,7 +61,11 @@ horseRouter.get("/listTest", async (context) => {
     const stmt = db.prepare(
         "SELECT * FROM HORSE"
     );
-    const dataList  = await stmt.first() as HorseData[];
+    const list = await stmt.all<HorseData>();
+
+    const dataList = list.results.map((result) => {
+        return result;
+    });
 
     return new Response(JSON.stringify(dataList), {
         headers: jsonHeader,
@@ -73,18 +75,18 @@ horseRouter.get("/listTest", async (context) => {
 //JSONの追加
 horseRouter.post("/push/:key", async (context) => {
     const key = context.req.param("key");
-    let horseData = await context.req.json<HorseData>();
 
+    let horseData = await context.req.json<HorseData>();
     let lastRecordDate = horseData.lastRecordDate.toString();
     let birthDate = horseData.birthDate ? horseData.birthDate.toString() : null;
     let deathDate = horseData.deathDate ? horseData.deathDate.toString() : null;
 
     let db = context.env.DB;
     let stmt = db.prepare(
-        "SELECT * FROM HORSE WHERE horseId = ?"
-    ).bind(key);
+        "SELECT * FROM HORSE WHERE HORSE = ?"
+    );
 
-    let result = await stmt.run();
+    let result = await stmt.bind(key).all();
     if (result.results.length > 0) {
         await context.env.DB.prepare(
             "UPDATE HORSE SET HORSE = ?1, BREEDER = ?2, OWNER = ?3, MOTHER = ?4, FATHER = ?5, COLOR = ?6, STYLE = ?7, SPEED = ?8, JUMP = ?9, HEALTH = ?10, NAME = ?11, BIRTH_DATE = ?12, LAST_RECORD_DATE = ?13, DEATH_DATE = ?14, HISTORY = ?15 WHERE horseId = ?16"
@@ -92,13 +94,10 @@ horseRouter.post("/push/:key", async (context) => {
             .run();
     } else {
         await context.env.DB.prepare(
-            "INSERT INTO HORSE (HORSE , BREEDER , OWNER , MOTHER , FATHER , COLOR , STYLE , SPEED , JUMP , HEALTH , NAME , BIRTH_DATE , LAST_RECORD_DATE , DEATH_DATE) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15)"
+            "INSERT INTO HORSE (HORSE , BREEDER , OWNER , MOTHER , FATHER , COLOR , STYLE , SPEED , JUMP , HEALTH , NAME , BIRTH_DATE , LAST_RECORD_DATE , DEATH_DATE, HISTORY) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15)"
         ).bind(horseData.horse, horseData.breeder, horseData.owner, horseData.mother, horseData.father, horseData.color, horseData.style, horseData.speed, horseData.jump, horseData.health, horseData.name, birthDate, lastRecordDate, deathDate, JSON.stringify(horseData.history))
             .run();
     }
-
-    const r2 = context.env.BUCKET_HORSE;
-    await r2.put(key + ".json", JSON.stringify(horseData.history));
     console.log("push is called. key is " + key + " by " + context.req.headers.get("User-Agent"))
     context.text("POST completed")
 });
@@ -114,12 +113,6 @@ horseRouter.get("/listAll", async (context) => {
         headers: jsonHeader,
     });
 });
-
-horseRouter.get("/rewrite", async (context) => {
-    await rewrite(context.env)
-    context.text("rewrite complete")
-});
-
 // horseRouter.get("/migration", async (context) => {
 //     const kv = context.env.RACE_ASSIST;
 //     const json = await kv.get("horse-list")
@@ -127,27 +120,30 @@ horseRouter.get("/rewrite", async (context) => {
 //         return notFoundResponse()
 //     }
 //
+//
+//
 //     const list: Array<HorseData> = JSON.parse(json);
 //
-//     await context.env.DB.prepare(
-//         "DELETE FROM HORSE WHERE 1"
-//     ).run();
-//
 //     let count = 0;
+//
+//     context.env.DB.prepare(
+//         "CREATE TABLE IF NOT EXISTS HORSE (HORSE TEXT PRIMARY KEY, BREEDER TEXT, OWNER TEXT, MOTHER TEXT, FATHER TEXT, COLOR TEXT, STYLE TEXT, SPEED REAL, JUMP REAL, HEALTH REAL, NAME TEXT, BIRTH_DATE TEXT, LAST_RECORD_DATE TEXT, DEATH_DATE TEXT, HISTORY JSON)"
+//     )
+//
 //
 //     const stmt = context.env.DB.prepare(
 //         "INSERT INTO HORSE (HORSE , BREEDER , OWNER , MOTHER , FATHER , COLOR , STYLE , SPEED , JUMP , HEALTH , NAME , BIRTH_DATE , LAST_RECORD_DATE , DEATH_DATE , HISTORY) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15)"
 //     )
+//
 //     for (const object of list) {
 //         count++;
-//
 //         let horseData = object;
 //         let lastRecordDate = horseData.lastRecordDate.toString();
 //         let birthDate = horseData.birthDate ? horseData.birthDate.toString() : null;
 //         let deathDate = horseData.deathDate ? horseData.deathDate.toString() : null;
 //
 //         await stmt.bind(horseData.horse, horseData.breeder, horseData.owner, horseData.mother, horseData.father, horseData.color, horseData.style,
-//             horseData.speed, horseData.jump, horseData.health, horseData.name, birthDate, lastRecordDate, deathDate, horseData.history.toString())
+//             horseData.speed, horseData.jump, horseData.health, horseData.name, birthDate, lastRecordDate, deathDate, JSON.stringify(horseData.history))
 //             .run();
 //     }
 //
