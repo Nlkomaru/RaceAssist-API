@@ -58,6 +58,18 @@ horseRouter.get("/list", async (context) => {
     });
 });
 
+horseRouter.get("/listTest", async (context) => {
+    const db = context.env.DB;
+    const stmt = db.prepare(
+        "SELECT * FROM HORSE"
+    );
+    const dataList  = await stmt.first() as HorseData[];
+
+    return new Response(JSON.stringify(dataList), {
+        headers: jsonHeader,
+    });
+});
+
 //JSONの追加
 horseRouter.post("/push/:key", async (context) => {
     const key = context.req.param("key");
@@ -108,44 +120,41 @@ horseRouter.get("/rewrite", async (context) => {
     context.text("rewrite complete")
 });
 
-horseRouter.get("/migration", async (context) => {
-    const kv = context.env.RACE_ASSIST;
-    const json = await kv.get("horse-list")
-    if (!json) {
-        return notFoundResponse()
-    }
-
-    const list: Array<HorseData> = JSON.parse(json);
-
-    await context.env.DB.prepare(
-        "DELETE FROM HORSE WHERE 1"
-    ).run();
-
-    let count = 0;
-    console.log("migration is started")
-
-    const stmt = context.env.DB.prepare(
-        "INSERT INTO HORSE (HORSE , BREEDER , OWNER , MOTHER , FATHER , COLOR , STYLE , SPEED , JUMP , HEALTH , NAME , BIRTH_DATE , LAST_RECORD_DATE , DEATH_DATE , HISTORY) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14, ?15)"
-    )
-    for (const object of list) {
-        count++;
-
-        let horseData = object;
-        let lastRecordDate = horseData.lastRecordDate.toString();
-        let birthDate = horseData.birthDate ? horseData.birthDate.toString() : null;
-        let deathDate = horseData.deathDate ? horseData.deathDate.toString() : null;
-
-        stmt
-            .bind(horseData.horse, horseData.breeder, horseData.owner, horseData.mother, horseData.father, horseData.color, horseData.style,
-                horseData.speed, horseData.jump, horseData.health, horseData.name, birthDate, lastRecordDate, deathDate, JSON.stringify(horseData.history))
-    }
-    await stmt.run();
-
-
-    console.log("migration is called by " + context.req.headers.get("User-Agent"))
-    console.log("migration complete " + count + " records")
-    context.text("migration complete " + count + " records")
-});
+// horseRouter.get("/migration", async (context) => {
+//     const kv = context.env.RACE_ASSIST;
+//     const json = await kv.get("horse-list")
+//     if (!json) {
+//         return notFoundResponse()
+//     }
+//
+//     const list: Array<HorseData> = JSON.parse(json);
+//
+//     await context.env.DB.prepare(
+//         "DELETE FROM HORSE WHERE 1"
+//     ).run();
+//
+//     let count = 0;
+//
+//     const stmt = context.env.DB.prepare(
+//         "INSERT INTO HORSE (HORSE , BREEDER , OWNER , MOTHER , FATHER , COLOR , STYLE , SPEED , JUMP , HEALTH , NAME , BIRTH_DATE , LAST_RECORD_DATE , DEATH_DATE , HISTORY) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15)"
+//     )
+//     for (const object of list) {
+//         count++;
+//
+//         let horseData = object;
+//         let lastRecordDate = horseData.lastRecordDate.toString();
+//         let birthDate = horseData.birthDate ? horseData.birthDate.toString() : null;
+//         let deathDate = horseData.deathDate ? horseData.deathDate.toString() : null;
+//
+//         await stmt.bind(horseData.horse, horseData.breeder, horseData.owner, horseData.mother, horseData.father, horseData.color, horseData.style,
+//             horseData.speed, horseData.jump, horseData.health, horseData.name, birthDate, lastRecordDate, deathDate, horseData.history.toString())
+//             .run();
+//     }
+//
+//     console.log("migration is called by " + context.req.headers.get("User-Agent"))
+//     console.log("migration complete " + count + " records")
+//     context.text("migration complete " + count + " records")
+// });
 
 
 export default horseRouter;
