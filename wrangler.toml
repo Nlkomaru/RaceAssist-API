@@ -1,9 +1,10 @@
-name = "raceassist-router" 
-main ="src/index.ts"
+name = "raceassist-router"
+main = "src/index.ts"
 compatibility_date = "2022-05-03"
 
+
 kv_namespaces = [
-    { binding = "RACE_ASSIST", id = "5154786ca7ad4d699d046ce708de825e" }
+    { binding = "RACE_ASSIST", id = "5154786ca7ad4d699d046ce708de825e", preview_id = "dcdda97549c144b09e59f1e87f7ca5ef"  }
 ]
 
 [[r2_buckets]]

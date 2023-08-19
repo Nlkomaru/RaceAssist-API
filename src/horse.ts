@@ -87,8 +87,6 @@ horseRouter.post("/push/:key", async (context) => {
 
     const r2 = context.env.BUCKET_HORSE;
     await r2.put(key + ".json", JSON.stringify(horseData.history));
-
-
     console.log("push is called. key is " + key + " by " + context.req.headers.get("User-Agent"))
     context.text("POST completed")
 });
@@ -137,11 +135,12 @@ horseRouter.get("/migration", async (context) => {
         let birthDate = horseData.birthDate ? horseData.birthDate.toString() : null;
         let deathDate = horseData.deathDate ? horseData.deathDate.toString() : null;
 
-        await stmt
+        stmt
             .bind(horseData.horse, horseData.breeder, horseData.owner, horseData.mother, horseData.father, horseData.color, horseData.style,
                 horseData.speed, horseData.jump, horseData.health, horseData.name, birthDate, lastRecordDate, deathDate, JSON.stringify(horseData.history))
-            .run();
     }
+    await stmt.run();
+
 
     console.log("migration is called by " + context.req.headers.get("User-Agent"))
     console.log("migration complete " + count + " records")
