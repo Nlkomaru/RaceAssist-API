@@ -45,11 +45,10 @@ horseRouter.get("/list", async (context) => {
         "SELECT * FROM HORSE"
     );
 
-    const result = await stmt.all();
-    const nameList = Array<string>();
-    result.results.forEach((object) => {
-        nameList.push((object.horseId as string));
-    });
+    const result = await stmt.all<HorseData>();
+    const nameList  = result.results.map((result) => {
+        return result.horse;
+    })
 
     return new Response(JSON.stringify(nameList), {
         headers: jsonHeader,
@@ -59,7 +58,7 @@ horseRouter.get("/list", async (context) => {
 horseRouter.get("/listTest", async (context) => {
     const db = context.env.DB;
     const stmt = db.prepare(
-        "SELECT * FROM HORSE"
+        "SELECT * FROM HORSE ORDER BY ()"
     );
     const list = await stmt.all<HorseData>();
 
@@ -125,9 +124,9 @@ horseRouter.get("/migration", async (context) => {
 
     let count = 0;
 
-    context.env.DB.prepare(
+    await context.env.DB.prepare(
         "CREATE TABLE IF NOT EXISTS HORSE (horse TEXT PRIMARY KEY, breeder TEXT, owner TEXT, mother TEXT, father TEXT, color TEXT, style TEXT, speed REAL, jump REAL, health REAL, name TEXT, birthDate TEXT, lastRecordDate TEXT, deathDate TEXT, history JSON)"
-    )
+    ).run()
 
 
     const stmt = context.env.DB.prepare(
