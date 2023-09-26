@@ -42,12 +42,12 @@ horseRouter.get("/record/:key", async (context) => {
 horseRouter.get("/list", async (context) => {
     const db = context.env.DB;
     const stmt = db.prepare(
-        "SELECT * FROM HORSE"
+        "SELECT * FROM HORSE ORDER BY (speed / 4.21 + jump / 5.0) DESC"
     );
 
-    const result = await stmt.all<HorseData>();
-    const nameList  = result.results.map((result) => {
-        return result.horse;
+    const {results} = await stmt.all<HorseData>();
+    let nameList = results.map((result) => {
+        return result.horse
     })
 
     return new Response(JSON.stringify(nameList), {
@@ -89,17 +89,15 @@ horseRouter.post("/push/:key", async (context) => {
 horseRouter.get("/listAll", async (context) => {
     const db = context.env.DB;
     const stmt = db.prepare(
-        "SELECT * FROM HORSE ORDER BY ()"
+        "SELECT * FROM HORSE ORDER BY (speed / 4.21 + jump / 5.0) DESC"
     );
-    const list = await stmt.all<HorseData>();
 
-    const dataList = list.results.map((result) => {
-        return result;
-    });
+    const {results} = await stmt.all<HorseData>();
 
-    return new Response(JSON.stringify(dataList), {
+    return new Response(JSON.stringify(results), {
         headers: jsonHeader,
     });
 });
+
 
 export default horseRouter;
